@@ -1,7 +1,7 @@
 package exercise_1;
 
 import com.google.common.collect.Lists;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaRDD; // Java resilient distributed dataset (RDD)
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.*;
 import org.apache.spark.sql.Row;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class Exercise_1 {
 
-    // Apply (vertex program):
+    // APPLY (vertex program):
     // Applies a user-defined function `f` to each vertex in parallel; meaning that `f` specifies the behaviour of a single vertex v
     // at a particular superstep S. On the first iteration, the vertex program is invoked on all vertices and the pre-defined
     // message is passed. On subsequent iterations, the vertex program is only invoked on those vertices that receive messages.
@@ -86,7 +86,18 @@ public class Exercise_1 {
                 scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
 
         GraphOps ops = new GraphOps(G, scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
-        
+
+        // Call to the `Pregel` framework. The parameters are as follows:
+        // * initialMsg: is the message that all vertices will receive at the start of superstep 0.
+        //               Here we use Integer.MAX_VALUE just for the purpose of identifying supertep 0
+        // * maxIter: indicates the maximum number of iterations (i.e. supersteps).
+        //            Here we set it as Integer.MAX_VALUE as convergence is guaranteed.
+        // * activeDir: refers to the edge direction in which to send the message.
+        // * Apply function
+        // * Scatter function
+        // * Gather function
+        // * evidence: the definition of the class being passed as message. Note the usage of
+        //              scala.reflect.ClassTag$.MODULE$.apply(Integer.class), which uses Scala's API.
         Tuple2<Long,Integer> max = (Tuple2<Long,Integer>)ops.pregel(
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,      // Run until convergence

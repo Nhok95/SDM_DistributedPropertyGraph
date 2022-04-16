@@ -23,13 +23,15 @@ import java.util.Map;
 
 public class Exercise_2 {
 
-    private static class VProg extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
+    // APPLY (vertex program):
+    private static class vertexProgram extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
             return null;
         }
     }
 
+    // SCATTER (send message):
     private static class sendMsg extends AbstractFunction1<EdgeTriplet<Integer,Integer>, Iterator<Tuple2<Object,Integer>>> implements Serializable {
         @Override
         public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<Integer, Integer> triplet) {
@@ -37,6 +39,7 @@ public class Exercise_2 {
         }
     }
 
+    // GATHER (merge):
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
@@ -46,30 +49,30 @@ public class Exercise_2 {
 
 	public static void shortestPaths(JavaSparkContext ctx) {
         Map<Long, String> labels = ImmutableMap.<Long, String>builder()
-                .put(1l, "A")
-                .put(2l, "B")
-                .put(3l, "C")
-                .put(4l, "D")
-                .put(5l, "E")
-                .put(6l, "F")
+                .put(1L, "A")
+                .put(2L, "B")
+                .put(3L, "C")
+                .put(4L, "D")
+                .put(5L, "E")
+                .put(6L, "F")
                 .build();
 
         List<Tuple2<Object,Integer>> vertices = Lists.newArrayList(
-                new Tuple2<Object,Integer>(1l,0),
-                new Tuple2<Object,Integer>(2l,Integer.MAX_VALUE),
-                new Tuple2<Object,Integer>(3l,Integer.MAX_VALUE),
-                new Tuple2<Object,Integer>(4l,Integer.MAX_VALUE),
-                new Tuple2<Object,Integer>(5l,Integer.MAX_VALUE),
-                new Tuple2<Object,Integer>(6l,Integer.MAX_VALUE)
+                new Tuple2<Object,Integer>(1L,0),
+                new Tuple2<Object,Integer>(2L,Integer.MAX_VALUE),
+                new Tuple2<Object,Integer>(3L,Integer.MAX_VALUE),
+                new Tuple2<Object,Integer>(4L,Integer.MAX_VALUE),
+                new Tuple2<Object,Integer>(5L,Integer.MAX_VALUE),
+                new Tuple2<Object,Integer>(6L,Integer.MAX_VALUE)
         );
         List<Edge<Integer>> edges = Lists.newArrayList(
-                new Edge<Integer>(1l,2l, 4), // A --> B (4)
-                new Edge<Integer>(1l,3l, 2), // A --> C (2)
-                new Edge<Integer>(2l,3l, 5), // B --> C (5)
-                new Edge<Integer>(2l,4l, 10), // B --> D (10)
-                new Edge<Integer>(3l,5l, 3), // C --> E (3)
-                new Edge<Integer>(5l, 4l, 4), // E --> D (4)
-                new Edge<Integer>(4l, 6l, 11) // D --> F (11)
+                new Edge<Integer>(1L,2L, 4), // A --> B (4)
+                new Edge<Integer>(1L,3L, 2), // A --> C (2)
+                new Edge<Integer>(2L,3L, 5), // B --> C (5)
+                new Edge<Integer>(2L,4L, 10), // B --> D (10)
+                new Edge<Integer>(3L,5L, 3), // C --> E (3)
+                new Edge<Integer>(5L, 4L, 4), // E --> D (4)
+                new Edge<Integer>(4L, 6L, 11) // D --> F (11)
         );
 
         JavaRDD<Tuple2<Object,Integer>> verticesRDD = ctx.parallelize(vertices);
@@ -83,7 +86,7 @@ public class Exercise_2 {
         ops.pregel(Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
                 EdgeDirection.Out(),
-                new VProg(),
+                new vertexProgram(),
                 new sendMsg(),
                 new merge(),
                 ClassTag$.MODULE$.apply(Integer.class))
