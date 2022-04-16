@@ -25,10 +25,16 @@ public class Main {
 
 		SparkConf conf = new SparkConf().setAppName("SparkGraphs_II").setMaster("local[*]");
 		JavaSparkContext ctx = new JavaSparkContext(conf);
+
+        // Set the directory under which RDDs are going to be checkpointed.
+        // The directory must be a HDFS path if running on a cluster
 		ctx.setCheckpointDir(Files.createTempDir().getAbsolutePath());
-		
-		SQLContext sqlctx = new SQLContext(ctx);
-		
+
+        // The entry point for working with structured data in Spark 1.x
+        // As of Spark 2.0, this is replaced by SparkSession.
+        // However, we are keeping the class here for backward compatibility.
+		SQLContext sqlContext = new SQLContext(ctx);
+
         Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
         Logger.getLogger("org.apache.spark.storage.BlockManager").setLevel(
                 Level.ERROR);
@@ -45,10 +51,10 @@ public class Main {
             Exercise_3.shortestPathsExt(ctx);
         }
         else if (args[0].equals("exercise4_warmup")) {
-        	Exercise_4_warmup.warmup(ctx,sqlctx);
+        	Exercise_4_warmup.warmup(ctx,sqlContext);
         }
         else if (args[0].equals("exercise4")) {
-            Exercise_4.wikipedia(ctx,sqlctx);
+            Exercise_4.wikipedia(ctx,sqlContext);
         }
         else {
 		    throw new Exception("Wrong exercise number");

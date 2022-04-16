@@ -21,7 +21,11 @@ import java.util.List;
 
 public class Exercise_1 {
 
-    private static class VProg extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
+    // Apply (vertex program):
+    // Applies a user-defined function `f` to each vertex in parallel; meaning that `f` specifies the behaviour of a single vertex v
+    // at a particular superstep S. On the first iteration, the vertex program is invoked on all vertices and the pre-defined
+    // message is passed. On subsequent iterations, the vertex program is only invoked on those vertices that receive messages.
+    private static class vertexProgram extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
             if (message == Integer.MAX_VALUE) {             // superstep 0
@@ -32,6 +36,8 @@ public class Exercise_1 {
         }
     }
 
+    // SCATTER (send message):
+    // May send messages to other vertices, such that those vertices will receive the messages in the next superstep S + 1
     private static class sendMsg extends AbstractFunction1<EdgeTriplet<Integer,Integer>, Iterator<Tuple2<Object,Integer>>> implements Serializable {
         @Override
         public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<Integer, Integer> triplet) {
@@ -48,6 +54,9 @@ public class Exercise_1 {
         }
     }
 
+    // GATHER (merge):
+    // Receives and reads messages that are sent to a node v from the previous superstep S-1.
+    // This function must be commutative and associative.
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
@@ -57,17 +66,17 @@ public class Exercise_1 {
 
     public static void maxValue(JavaSparkContext ctx) {
         List<Tuple2<Object,Integer>> vertices = Lists.newArrayList(
-            new Tuple2<Object,Integer>(1l,9),
-            new Tuple2<Object,Integer>(2l,1),
-            new Tuple2<Object,Integer>(3l,6),
-            new Tuple2<Object,Integer>(4l,8)
+            new Tuple2<Object,Integer>(1L,9),
+            new Tuple2<Object,Integer>(2L,1),
+            new Tuple2<Object,Integer>(3L,6),
+            new Tuple2<Object,Integer>(4L,8)
         );
         List<Edge<Integer>> edges = Lists.newArrayList(
-            new Edge<Integer>(1l,2l, 1),
-            new Edge<Integer>(2l,3l, 1),
-            new Edge<Integer>(2l,4l, 1),
-            new Edge<Integer>(3l,4l, 1),
-            new Edge<Integer>(3l,1l, 1)
+            new Edge<Integer>(1L,2L, 1),
+            new Edge<Integer>(2L,3L, 1),
+            new Edge<Integer>(2L,4L, 1),
+            new Edge<Integer>(3L,4L, 1),
+            new Edge<Integer>(3L,1L, 1)
         );
 
         JavaRDD<Tuple2<Object,Integer>> verticesRDD = ctx.parallelize(vertices);
@@ -77,12 +86,12 @@ public class Exercise_1 {
                 scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
 
         GraphOps ops = new GraphOps(G, scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
-
+        
         Tuple2<Long,Integer> max = (Tuple2<Long,Integer>)ops.pregel(
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,      // Run until convergence
                 EdgeDirection.Out(),
-                new VProg(),
+                new vertexProgram(),
                 new sendMsg(),
                 new merge(),
                 scala.reflect.ClassTag$.MODULE$.apply(Integer.class))
