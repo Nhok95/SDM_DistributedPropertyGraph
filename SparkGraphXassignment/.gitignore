@@ -19,5 +19,4 @@
 out/
 
 # Maven
-/target/classes/Main.class
 /target/*
