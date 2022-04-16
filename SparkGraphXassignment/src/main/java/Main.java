@@ -4,6 +4,7 @@ import exercise_3.Exercise_3;
 import exercise_4.Exercise_4;
 import exercise_4.Exercise_4_warmup;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,7 +17,8 @@ import utils.Utils;
 
 public class Main {
 
-	static String HADOOP_COMMON_PATH = "SET THE ABSOLUTE PATH OF THE RESOURCE DIRECTORY WHERE THE WINUTILS IS LOCATED"; // "C:\\...\\SparkGraphXassignment\\src\\main\\resources"
+    //"SET THE ABSOLUTE PATH OF THE RESOURCE DIRECTORY WHERE THE WINUTILS IS LOCATED"
+	static String HADOOP_COMMON_PATH = System.getProperty("user.dir") + "\\src\\main\\resources"; // "C:\\...\\SparkGraphXassignment\\src\\main\\resources"
 	
 	public static void  main(String[] args) throws Exception {
 		System.setProperty("hadoop.home.dir", HADOOP_COMMON_PATH);

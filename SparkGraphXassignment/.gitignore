@@ -1,0 +1,23 @@
+## SUBSET FROM:
+# Reference: https://www.gitignore.io/api/intellij
+# Reference: https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+# Reference: https://github.com/github/gitignore/blob/main/Maven.gitignore
+
+## GITIGNORE
+
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# Maven
+/target/classes/Main.class
+/target/*
