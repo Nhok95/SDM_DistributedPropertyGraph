@@ -42,7 +42,7 @@ public class Exercise_2 {
             Tuple2<Object,Integer> dstVertex = triplet.toTuple()._2();
             Integer edgeValue = triplet.toTuple()._3();
 
-            if (sourceVertex._2 >= dstVertex._2 - edgeValue) {   // edge value is greater than dst vertex value?
+            if (sourceVertex._2 >= dstVertex._2 - edgeValue) {   // edge value + currentPath is greater than dst vertex value?
                 // do nothing
                 //System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
@@ -59,12 +59,13 @@ public class Exercise_2 {
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
-            System.out.println("----Merge----");
+            //System.out.println("----Merge----");
             return null; // Math.min(o, o2); // return the shortest path between 2 options
         }
     }
 
 	public static void shortestPaths(JavaSparkContext ctx) {
+        System.out.println("---- Exercise 2 ----");
         Map<Long, String> labels = ImmutableMap.<Long, String>builder()
                 .put(1L, "A")
                 .put(2L, "B")
@@ -113,6 +114,7 @@ public class Exercise_2 {
                 Tuple2<Object,Integer> vertex = (Tuple2<Object,Integer>)v;
                 System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+vertex._2);
             });
+        System.out.println("----------------");
 	}
 	
 }

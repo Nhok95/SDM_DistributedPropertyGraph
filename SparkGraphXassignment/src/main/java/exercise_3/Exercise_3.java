@@ -70,7 +70,7 @@ public class Exercise_3 {
     private static class vertexProgram extends AbstractFunction3<Long,vertexValue,vertexValue,vertexValue> implements Serializable {
         @Override
         public vertexValue apply(Long vertexID, vertexValue vertexValue, vertexValue message) {
-            System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue);
+            // System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue);
             // return the shortest past until the moment.
             if (vertexValue.getValue() > message.getValue()) { // message value has a shorter path value
                 return message; // if the coming message has a lower value the message becomes the new vertex
@@ -92,7 +92,7 @@ public class Exercise_3 {
 
             if (sourceVertex._2.getValue() >= dstVertex._2.getValue() - edgeValue) {   // edge value is greater than dst vertex?
                 // do nothing
-                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
+                // System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,vertexValue>>().iterator()).asScala();
             } else {
                 // propagate source vertex value
@@ -102,23 +102,29 @@ public class Exercise_3 {
 
                 vertexValue message = new vertexValue(newValue, path);
 
-                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ message +")");
+                // System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ message +")");
                 return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,vertexValue>(triplet.dstId(),message)).iterator()).asScala();
             }
         }
     }
 
     // GATHER (merge):
-    private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
+    private static class merge extends AbstractFunction2<vertexValue,vertexValue,vertexValue> implements Serializable {
         @Override
-        public Integer apply(Integer o, Integer o2) {
+        public vertexValue apply(vertexValue o, vertexValue o2) {
+            // Same as the vertexProgram
+            if (o.getValue() > o2.getValue()) {
+                return o2;
+            } else {
+                return o;
+            }
 
-            return null;//Math.min(o, o2); // return the shortest path between 2 options
+            // return null;
         }
     }
 
     public static void shortestPathsExt(JavaSparkContext ctx) {
-
+        System.out.println("---- Exercise 3 ----");
         Map<Long, String> labels = ImmutableMap.<Long, String>builder()
                 .put(1L, "A")
                 .put(2L, "B")
@@ -168,10 +174,15 @@ public class Exercise_3 {
             .toJavaRDD().sortBy(f -> ((Tuple2<Object, Integer>) f)._1, true, 0)
             .foreach(v -> {
                 Tuple2<Object,vertexValue> vertex = (Tuple2<Object,vertexValue>)v;
-                List<String> pathLabels;
-                System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+ vertex._2.getPath() + " with cost " + vertex._2.getValue() );
+                List<String> pathLabels = new ArrayList<>();
+                for (Long id : vertex._2.getPath()) {
+                    pathLabels.add(labels.get(id));
+                }
+
+                System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+ pathLabels + " with cost " + vertex._2.getValue() );
             });
 
+        System.out.println("----------------");
     }
 	
 }
