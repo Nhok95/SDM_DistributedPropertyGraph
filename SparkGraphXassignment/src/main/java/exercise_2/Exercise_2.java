@@ -27,7 +27,10 @@ public class Exercise_2 {
     private static class vertexProgram extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
-            return null;
+            //System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue + "\nMin: " + Math.min(vertexValue,message));
+            // return the shortest past until the moment.
+            return Math.min(vertexValue, message); //new value for the vertex vertexID
+
         }
     }
 
@@ -35,7 +38,20 @@ public class Exercise_2 {
     private static class sendMsg extends AbstractFunction1<EdgeTriplet<Integer,Integer>, Iterator<Tuple2<Object,Integer>>> implements Serializable {
         @Override
         public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<Integer, Integer> triplet) {
-            return null;
+            Tuple2<Object,Integer> sourceVertex = triplet.toTuple()._1();
+            Tuple2<Object,Integer> dstVertex = triplet.toTuple()._2();
+            Integer edgeValue = triplet.toTuple()._3();
+
+            if (sourceVertex._2 >= dstVertex._2 - edgeValue) {   // edge value is greater than dst vertex value?
+                // do nothing
+                //System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
+                return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
+            } else {
+                // propagate edge value only if is a shorter path
+                Integer newMessage = sourceVertex._2+edgeValue;
+                //System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ newMessage +")");
+                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(),newMessage)).iterator()).asScala();
+            }
         }
     }
 
@@ -43,7 +59,8 @@ public class Exercise_2 {
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
-            return null;
+            System.out.println("----Merge----");
+            return null; // Math.min(o, o2); // return the shortest path between 2 options
         }
     }
 
@@ -91,10 +108,10 @@ public class Exercise_2 {
                 new merge(),
                 ClassTag$.MODULE$.apply(Integer.class))
             .vertices()
-            .toJavaRDD()
+            .toJavaRDD().sortBy(f -> ((Tuple2<Object, Integer>) f)._1, true, 0)
             .foreach(v -> {
                 Tuple2<Object,Integer> vertex = (Tuple2<Object,Integer>)v;
-                System.out.println("Minimum cost to get from "+labels.get(1l)+" to "+labels.get(vertex._1)+" is "+vertex._2);
+                System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+vertex._2);
             });
 	}
 	

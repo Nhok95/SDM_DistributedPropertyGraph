@@ -29,8 +29,10 @@ public class Exercise_1 {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
             if (message == Integer.MAX_VALUE) {             // superstep 0
+                System.out.println("--Vertex program for vertex:" + vertexID + "--\nValue(0): " + vertexValue +"\nMessage(0): " + message);
                 return vertexValue;
             } else {                                        // superstep > 0
+                System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue + "\nMax: " + Math.max(vertexValue,message));
                 return Math.max(vertexValue,message);
             }
         }
@@ -46,9 +48,11 @@ public class Exercise_1 {
 
             if (sourceVertex._2 <= dstVertex._2) {   // source vertex value is smaller than dst vertex?
                 // do nothing
+                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
             } else {
                 // propagate source vertex value
+                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex + "\nPropagateSource");
                 return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(),sourceVertex._2)).iterator()).asScala();
             }
         }
@@ -59,9 +63,7 @@ public class Exercise_1 {
     // This function must be commutative and associative.
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
-        public Integer apply(Integer o, Integer o2) {
-            return null;
-        }
+        public Integer apply(Integer o, Integer o2) {return null;}
     }
 
     public static void maxValue(JavaSparkContext ctx) {
@@ -98,6 +100,7 @@ public class Exercise_1 {
         // * Gather function
         // * evidence: the definition of the class being passed as message. Note the usage of
         //              scala.reflect.ClassTag$.MODULE$.apply(Integer.class), which uses Scala's API.
+        // returns a tuple with <VertexID, Value>
         Tuple2<Long,Integer> max = (Tuple2<Long,Integer>)ops.pregel(
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,      // Run until convergence
@@ -107,7 +110,7 @@ public class Exercise_1 {
                 new merge(),
                 scala.reflect.ClassTag$.MODULE$.apply(Integer.class))
         .vertices().toJavaRDD().first();
-
+        
         System.out.println(max._2 + " is the maximum value in the graph");
 	}
 	
