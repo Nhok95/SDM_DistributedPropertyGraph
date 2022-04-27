@@ -110,7 +110,7 @@ public class Exercise_1 {
                 new merge(),
                 scala.reflect.ClassTag$.MODULE$.apply(Integer.class))
         .vertices().toJavaRDD().first();
-        
+
         System.out.println(max._2 + " is the maximum value in the graph");
 	}
 	

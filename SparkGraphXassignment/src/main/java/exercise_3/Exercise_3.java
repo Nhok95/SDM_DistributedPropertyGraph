@@ -21,16 +21,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-class vertexValue {
-    private Integer value = 0;
-    private ArrayList<Long> path = new ArrayList<Long>();
-
-    vertexValue() {
-        this.value = value;
-    }
+class vertexValue implements Serializable{
+    private Integer value;
+    private List<Long> path;
 
     vertexValue(Integer value) {
         this.value = value;
+        this.path = new ArrayList<>();
     }
 
     vertexValue(Integer value, ArrayList<Long> path) {
@@ -42,7 +39,7 @@ class vertexValue {
         return value;
     }
 
-    public ArrayList<Long> getPath() {
+    public List<Long> getPath() {
         return path;
     }
 
@@ -50,12 +47,20 @@ class vertexValue {
         this.value = value;
     }
 
-    public void setPath(ArrayList<Long> path) {
+    public void setPath(List<Long> path) {
         this.path = path;
     }
 
     public void addElement2Path(Long element) {
         this.path.add(element);
+    }
+
+    @Override
+    public String toString() {
+        return "vertexValue{" +
+                "value=" + value +
+                ", path=" + path +
+                '}';
     }
 }
 
@@ -65,31 +70,21 @@ public class Exercise_3 {
     private static class vertexProgram extends AbstractFunction3<Long,vertexValue,vertexValue,vertexValue> implements Serializable {
         @Override
         public vertexValue apply(Long vertexID, vertexValue vertexValue, vertexValue message) {
-            //System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue + "\nMin: " + Math.min(vertexValue,message));
+            System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue);
             // return the shortest past until the moment.
-
-            // new vertex value has by default the original vertex value.
-            Integer newMin = vertexValue.getValue();
-            ArrayList<Long> newPath = vertexValue.getPath();
-
-            // if the coming message has a lower value the message becomes the new vertex
             if (vertexValue.getValue() > message.getValue()) { // message value has a shorter path value
-                newMin = message.getValue();
-                newPath = message.getPath();
+                return message; // if the coming message has a lower value the message becomes the new vertex
+            } else {
+                return vertexValue;
             }
-
-            // Finally, we add the current vertexID to the Path
-            newPath.add(vertexID);
-
-            return new vertexValue(newMin, newPath); //new value for the vertex vertexID
 
         }
     }
 
     // SCATTER (send message):
-    private static class sendMsg extends AbstractFunction1<EdgeTriplet<vertexValue,Integer>, Iterator<Tuple2<Object,Integer>>> implements Serializable {
+    private static class sendMsg extends AbstractFunction1<EdgeTriplet<vertexValue,Integer>, Iterator<Tuple2<Object,vertexValue>>> implements Serializable {
         @Override
-        public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<vertexValue, Integer> triplet) {
+        public Iterator<Tuple2<Object, vertexValue>> apply(EdgeTriplet<vertexValue, Integer> triplet) {
             Tuple2<Object,vertexValue> sourceVertex = triplet.toTuple()._1();
             Tuple2<Object,vertexValue> dstVertex = triplet.toTuple()._2();
             Integer edgeValue = triplet.toTuple()._3();
@@ -98,11 +93,17 @@ public class Exercise_3 {
             if (sourceVertex._2.getValue() >= dstVertex._2.getValue() - edgeValue) {   // edge value is greater than dst vertex?
                 // do nothing
                 System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
-                return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
+                return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,vertexValue>>().iterator()).asScala();
             } else {
                 // propagate source vertex value
-                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateSource");
-                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(),sourceVertex._2.getValue()+edgeValue)).iterator()).asScala();
+                Integer newValue = sourceVertex._2.getValue() + edgeValue;
+                ArrayList<Long> path = (ArrayList) sourceVertex._2.getPath();
+                path.add((Long) dstVertex._1);
+
+                vertexValue message = new vertexValue(newValue, path);
+
+                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ message +")");
+                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,vertexValue>(triplet.dstId(),message)).iterator()).asScala();
             }
         }
     }
@@ -127,8 +128,10 @@ public class Exercise_3 {
                 .put(6L, "F")
                 .build();
 
+        ArrayList<Long> path = new ArrayList<>();
+        path.add(1l);
         List<Tuple2<Object,vertexValue>> vertices = Lists.newArrayList(
-                new Tuple2<Object,vertexValue>(1L,new vertexValue()),
+                new Tuple2<Object,vertexValue>(1L,new vertexValue(0, path)),
                 new Tuple2<Object,vertexValue>(2L,new vertexValue(Integer.MAX_VALUE)),
                 new Tuple2<Object,vertexValue>(3L,new vertexValue(Integer.MAX_VALUE)),
                 new Tuple2<Object,vertexValue>(4L,new vertexValue(Integer.MAX_VALUE)),
@@ -148,7 +151,7 @@ public class Exercise_3 {
         JavaRDD<Tuple2<Object,vertexValue>> verticesRDD = ctx.parallelize(vertices);
         JavaRDD<Edge<Integer>> edgesRDD = ctx.parallelize(edges);
 
-        Graph<vertexValue,Integer> G = Graph.apply(verticesRDD.rdd(),edgesRDD.rdd(),new vertexValue(), StorageLevel.MEMORY_ONLY(), StorageLevel.MEMORY_ONLY(),
+        Graph<vertexValue,Integer> G = Graph.apply(verticesRDD.rdd(),edgesRDD.rdd(),new vertexValue(0), StorageLevel.MEMORY_ONLY(), StorageLevel.MEMORY_ONLY(),
                 scala.reflect.ClassTag$.MODULE$.apply(vertexValue.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
 
         GraphOps ops = new GraphOps(G, scala.reflect.ClassTag$.MODULE$.apply(vertexValue.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
@@ -160,12 +163,13 @@ public class Exercise_3 {
                 new Exercise_3.vertexProgram(),
                 new Exercise_3.sendMsg(),
                 new Exercise_3.merge(),
-                ClassTag$.MODULE$.apply(Integer.class))
+                ClassTag$.MODULE$.apply(vertexValue.class))
             .vertices()
-            .toJavaRDD()
+            .toJavaRDD().sortBy(f -> ((Tuple2<Object, Integer>) f)._1, true, 0)
             .foreach(v -> {
                 Tuple2<Object,vertexValue> vertex = (Tuple2<Object,vertexValue>)v;
-                System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+ vertex._2.getPath() + "with cost " + vertex._2.getValue() );
+                List<String> pathLabels;
+                System.out.println("Minimum cost to get from "+labels.get(1L)+" to "+labels.get(vertex._1)+" is "+ vertex._2.getPath() + " with cost " + vertex._2.getValue() );
             });
 
     }
