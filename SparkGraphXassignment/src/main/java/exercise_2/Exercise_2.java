@@ -27,7 +27,6 @@ public class Exercise_2 {
     private static class vertexProgram extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
-            //System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue + "\nMin: " + Math.min(vertexValue,message));
             // return the shortest past until the moment.
             return Math.min(vertexValue, message); //new value for the vertex vertexID
 
@@ -44,12 +43,10 @@ public class Exercise_2 {
 
             if (sourceVertex._2 >= dstVertex._2 - edgeValue) {   // edge value + currentPath is greater than dst vertex value?
                 // do nothing
-                //System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
             } else {
                 // propagate edge value only if is a shorter path
                 Integer newMessage = sourceVertex._2+edgeValue;
-                //System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ newMessage +")");
                 return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(),newMessage)).iterator()).asScala();
             }
         }
@@ -59,7 +56,6 @@ public class Exercise_2 {
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
-            //System.out.println("----Merge----");
             return null; // Math.min(o, o2); // return the shortest path between 2 options
         }
     }

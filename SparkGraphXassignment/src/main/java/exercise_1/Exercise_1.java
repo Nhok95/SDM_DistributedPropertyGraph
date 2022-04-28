@@ -29,10 +29,8 @@ public class Exercise_1 {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
             if (message == Integer.MAX_VALUE) {             // superstep 0
-                System.out.println("--Vertex program for vertex:" + vertexID + "--\nValue(0): " + vertexValue +"\nMessage(0): " + message);
                 return vertexValue;
             } else {                                        // superstep > 0
-                System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue + "\nMax: " + Math.max(vertexValue,message));
                 return Math.max(vertexValue,message);
             }
         }
@@ -48,11 +46,9 @@ public class Exercise_1 {
 
             if (sourceVertex._2 <= dstVertex._2) {   // source vertex value is smaller than dst vertex?
                 // do nothing
-                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
             } else {
                 // propagate source vertex value
-                System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex + "\nPropagateSource");
                 return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(),sourceVertex._2)).iterator()).asScala();
             }
         }

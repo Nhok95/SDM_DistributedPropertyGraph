@@ -66,7 +66,6 @@ public class Exercise_3 {
     private static class vertexProgram extends AbstractFunction3<Long,vertexValue,vertexValue,vertexValue> implements Serializable {
         @Override
         public vertexValue apply(Long vertexID, vertexValue vertexValue, vertexValue message) {
-            // System.out.println("--Vertex program for vertex:" + vertexID + "--\nMessage: " + message +"\nValue: " + vertexValue);
             // return the shortest past until the moment.
             if (vertexValue.getValue() > message.getValue()) { // message value has a shorter path value
                 return message; // if the coming message has a lower value the message becomes the new vertex
@@ -88,7 +87,6 @@ public class Exercise_3 {
 
             if (sourceVertex._2.getValue() >= dstVertex._2.getValue() - edgeValue) {   // edge value is greater than dst vertex?
                 // do nothing
-                // System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nNothing");
                 return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,vertexValue>>().iterator()).asScala();
             } else {
                 // propagate source vertex value
@@ -98,7 +96,6 @@ public class Exercise_3 {
 
                 vertexValue message = new vertexValue(newValue, path);
 
-                // System.out.println("-----sendMsg-----\nsourceVertex: " + sourceVertex + "\ndstVertex: " + dstVertex +"\nEdgeValue: " + edgeValue + "\nPropagateEdge ("+ message +")");
                 return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,vertexValue>(triplet.dstId(),message)).iterator()).asScala();
             }
         }
@@ -114,7 +111,6 @@ public class Exercise_3 {
             } else {
                 return o;
             }
-
             // return null;
         }
     }
