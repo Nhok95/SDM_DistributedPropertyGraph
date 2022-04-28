@@ -51,10 +51,6 @@ class vertexValue implements Serializable{
         this.path = path;
     }
 
-    public void addElement2Path(Long element) {
-        this.path.add(element);
-    }
-
     @Override
     public String toString() {
         return "vertexValue{" +

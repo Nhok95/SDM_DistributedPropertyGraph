@@ -15,6 +15,8 @@ public class Exercise_4_warmup {
 
 	
 	public static void warmup(JavaSparkContext ctx, SQLContext sqlCtx) {
+		// vertex Data Frame: A vertex DataFrame should contain a special column named id
+		// that specifies unique IDs for each vertex in the graph.
 		java.util.List<Row> vertices_list = new ArrayList<Row>();
 		vertices_list.add(RowFactory.create("a", "Alice", 34));
 		vertices_list.add(RowFactory.create("b", "Bob", 36));
@@ -38,6 +40,8 @@ public class Exercise_4_warmup {
 		
 		
 		// edges creation
+		// Edge DataFrame: An edge DataFrame should contain two special columns: src (source
+		// vertex ID of edge) and dst (destination vertex ID of edge)
 		java.util.List<Row> edges_list = new ArrayList<Row>();
 		
 		edges_list.add(RowFactory.create("a", "b", "friend"));
@@ -59,7 +63,8 @@ public class Exercise_4_warmup {
 		});
 
 		Dataset<Row> edges = sqlCtx.createDataFrame(edges_rdd, edges_schema);
-		
+
+		// Graph creation
 		GraphFrame gf = GraphFrame.apply(vertices,edges);
 
 		System.out.println(gf);
